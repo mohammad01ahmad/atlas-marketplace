@@ -1,0 +1,248 @@
+// Mock lots, PRD 10.3. 8 lots so every lot state can be demonstrated.
+
+import type { Carton, Lot, ManifestLine } from '@/types';
+import { isoAt } from '@/lib/clock';
+
+function makeCartons(prefix: string, startNum: number, count: number, skus: string[]): Carton[] {
+  const cartons: Carton[] = [];
+  for (let i = 0; i < count; i++) {
+    const sealId = `${prefix}-${startNum + i}`;
+    cartons.push({ sealId, lines: [skus[i % skus.length]] });
+  }
+  return cartons;
+}
+
+export function createSeedLots(baseMs: number): Lot[] {
+  const lot1042Manifest: ManifestLine[] = [
+    { sku: 'EB-210', product: 'Wireless earbuds, ANC, black', qty: 1_200, unitRetailValue: 249, grade: 'New sealed' },
+    { sku: 'EB-180', product: 'Wireless earbuds, standard, white', qty: 1_600, unitRetailValue: 149, grade: 'New sealed' },
+    { sku: 'PB-20K', product: 'Power bank 20,000 mAh, 22.5W', qty: 1_400, unitRetailValue: 199, grade: 'New sealed' },
+    { sku: 'PB-10K', product: 'Power bank 10,000 mAh', qty: 600, unitRetailValue: 161, grade: 'New sealed' },
+  ];
+
+  const lots: Lot[] = [
+    {
+      id: 'LOT-1042',
+      sellerId: 's1',
+      title: 'Wireless earbuds and power banks, stranded East Africa order',
+      category: 'Electronics',
+      grade: 'New sealed',
+      gradeTolerancePct: 0.1,
+      warehouse: { emirate: 'Dubai', area: 'Jebel Ali' },
+      showSellerName: true,
+      manifest: lot1042Manifest,
+      cartons: makeCartons('S', 4_801, 60, lot1042Manifest.map((l) => l.sku)),
+      pallets: 6,
+      provenanceDoc: { type: 'Commercial invoice', verified: true },
+      sampleEvidence: [
+        { sku: 'EB-210', photos: ['placeholder-1.svg', 'placeholder-2.svg'], testResult: 'Passed, 12/12 units power on and pair' },
+        { sku: 'PB-20K', photos: ['placeholder-3.svg'], testResult: 'Passed, 10/10 units charge to rated capacity' },
+      ],
+      reserve: 170_000,
+      conditions: ['Export only'],
+      collectionWindow: { from: isoAt(baseMs, -2), to: isoAt(baseMs, 24 * 7) },
+      state: 'Bidding closed',
+      opensAt: isoAt(baseMs, -24 * 7),
+      closesAt: isoAt(baseMs, -2),
+      questions: [
+        {
+          id: 'q-1042-1',
+          askedBy: 'b6',
+          q: 'Are the power banks CE and FCC marked on the unit itself, not just the box?',
+          a: 'Yes, marked on the unit body as well as the retail box.',
+          at: isoAt(baseMs, -24 * 5),
+        },
+      ],
+    },
+    {
+      id: 'LOT-1043',
+      sellerId: 's1',
+      title: 'Smartwatch straps and chargers, discontinued models',
+      category: 'Electronics',
+      grade: 'New open box',
+      gradeTolerancePct: 0.1,
+      warehouse: { emirate: 'Dubai', area: 'Jebel Ali' },
+      showSellerName: true,
+      manifest: [
+        { sku: 'SW-STRAP', product: 'Smartwatch strap, silicone, assorted sizes', qty: 8_000, unitRetailValue: 22.5, grade: 'New open box' },
+        { sku: 'SW-CHRG', product: 'Smartwatch magnetic charger', qty: 4_000, unitRetailValue: 45, grade: 'New open box' },
+      ],
+      cartons: makeCartons('S', 5_101, 100, ['SW-STRAP', 'SW-CHRG']),
+      pallets: 10,
+      provenanceDoc: { type: 'Commercial invoice', verified: true },
+      sampleEvidence: [
+        { sku: 'SW-STRAP', photos: ['placeholder-1.svg'], testResult: 'Passed, packaging opened but contents complete' },
+      ],
+      reserve: 60_000,
+      conditions: [],
+      collectionWindow: { from: isoAt(baseMs, 48), to: isoAt(baseMs, 24 * 10) },
+      state: 'Live',
+      opensAt: isoAt(baseMs, -24),
+      closesAt: isoAt(baseMs, 48),
+      questions: [],
+    },
+    {
+      id: 'LOT-1051',
+      sellerId: 's2',
+      title: 'Skincare sets, end of season, expiry Aug 2027',
+      category: 'Cosmetics',
+      grade: 'New sealed',
+      gradeTolerancePct: 0.1,
+      warehouse: { emirate: 'Dubai', area: 'Al Quoz' },
+      showSellerName: false,
+      manifest: [
+        { sku: 'SC-PREM', product: 'Skincare gift set, premium', qty: 3_100, unitRetailValue: 175, expiry: '2027-08-31', grade: 'New sealed' },
+        { sku: 'SC-ESS', product: 'Skincare gift set, essentials', qty: 3_100, unitRetailValue: 165, expiry: '2027-08-31', grade: 'New sealed' },
+      ],
+      cartons: makeCartons('S', 6_201, 100, ['SC-PREM', 'SC-ESS']),
+      pallets: 10,
+      provenanceDoc: { type: 'Commercial invoice', verified: true },
+      sampleEvidence: [
+        { sku: 'SC-PREM', photos: ['placeholder-1.svg'], testResult: 'Passed, seals intact, within date' },
+      ],
+      reserve: 190_000,
+      conditions: [],
+      collectionWindow: { from: isoAt(baseMs, 20), to: isoAt(baseMs, 24 * 8) },
+      state: 'Live',
+      opensAt: isoAt(baseMs, -24 * 5),
+      closesAt: isoAt(baseMs, 20),
+      questions: [],
+    },
+    {
+      id: 'LOT-1055',
+      sellerId: 's2',
+      title: 'Hair dryers and straighteners, customer returns',
+      category: 'Electronics',
+      grade: 'Returns tested',
+      gradeTolerancePct: 0.15,
+      warehouse: { emirate: 'Dubai', area: 'Al Quoz' },
+      showSellerName: true,
+      manifest: [
+        { sku: 'HD-01', product: 'Hair dryer, 2200W, ionic', qty: 450, unitRetailValue: 300, grade: 'Returns tested' },
+        { sku: 'HS-01', product: 'Hair straightener, ceramic plates', qty: 450, unitRetailValue: 240, grade: 'Returns tested' },
+      ],
+      cartons: makeCartons('S', 6_401, 45, ['HD-01', 'HS-01']),
+      pallets: 5,
+      provenanceDoc: { type: 'Bill of entry', verified: true },
+      sampleEvidence: [
+        { sku: 'HD-01', photos: ['placeholder-1.svg'], testResult: 'Passed, 18/20 units power on, motor and heat tested' },
+      ],
+      reserve: 35_000,
+      conditions: [],
+      collectionWindow: { from: isoAt(baseMs, 24 * 3), to: isoAt(baseMs, 24 * 11) },
+      state: 'Live',
+      opensAt: isoAt(baseMs, -24 * 2),
+      closesAt: isoAt(baseMs, 24 * 3),
+      questions: [],
+    },
+    {
+      id: 'LOT-1060',
+      sellerId: 's3',
+      title: 'Kitchen storage and cookware bundles',
+      category: 'Household',
+      grade: 'New sealed',
+      gradeTolerancePct: 0.1,
+      warehouse: { emirate: 'Sharjah', area: 'Industrial Area 13' },
+      showSellerName: true,
+      manifest: [
+        { sku: 'KS-01', product: 'Storage container set, 10-piece', qty: 1_700, unitRetailValue: 65, grade: 'New sealed' },
+        { sku: 'CW-01', product: 'Cookware bundle, 5-piece nonstick', qty: 1_700, unitRetailValue: 95, grade: 'New sealed' },
+      ],
+      cartons: makeCartons('S', 6_601, 68, ['KS-01', 'CW-01']),
+      pallets: 7,
+      provenanceDoc: { type: 'Commercial invoice', verified: true },
+      sampleEvidence: [
+        { sku: 'CW-01', photos: ['placeholder-1.svg'], testResult: 'Passed, sealed boxes, no denting' },
+      ],
+      reserve: 48_000,
+      conditions: [],
+      collectionWindow: { from: isoAt(baseMs, 24 * 4), to: isoAt(baseMs, 24 * 12) },
+      state: 'Live',
+      opensAt: isoAt(baseMs, -24 * 3),
+      closesAt: isoAt(baseMs, 24 * 4),
+      questions: [],
+    },
+    {
+      id: 'LOT-1063',
+      sellerId: 's4',
+      title: "Men's and women's footwear, previous season",
+      category: 'Apparel',
+      grade: 'New sealed',
+      gradeTolerancePct: 0.1,
+      warehouse: { emirate: 'Dubai', area: 'Dubai Investments Park' },
+      showSellerName: true,
+      manifest: [
+        { sku: 'FW-M', product: "Men's footwear, mixed styles", qty: 1_300, unitRetailValue: 320, grade: 'New sealed' },
+        { sku: 'FW-W', product: "Women's footwear, mixed styles", qty: 1_300, unitRetailValue: 280, grade: 'New sealed' },
+      ],
+      cartons: makeCartons('S', 6_801, 52, ['FW-M', 'FW-W']),
+      pallets: 6,
+      provenanceDoc: { type: 'Commercial invoice', verified: true },
+      sampleEvidence: [
+        { sku: 'FW-M', photos: ['placeholder-1.svg'], testResult: 'Passed, boxed, labels attached' },
+      ],
+      reserve: 140_000,
+      conditions: ['No resale to UAE retail stores', 'Remove brand labels before resale (apparel only)'],
+      collectionWindow: { from: isoAt(baseMs, 24 * 5), to: isoAt(baseMs, 24 * 13) },
+      state: 'Live',
+      opensAt: isoAt(baseMs, -24 * 2),
+      closesAt: isoAt(baseMs, 24 * 5),
+      questions: [],
+    },
+    {
+      id: 'LOT-1038',
+      sellerId: 's1',
+      title: 'Bluetooth speakers, cancelled Iraq order',
+      category: 'Electronics',
+      grade: 'New sealed',
+      gradeTolerancePct: 0.1,
+      warehouse: { emirate: 'Dubai', area: 'Jebel Ali' },
+      showSellerName: true,
+      manifest: [
+        { sku: 'BT-SPK', product: 'Bluetooth speaker, portable, IPX6', qty: 1_500, unitRetailValue: 270, grade: 'New sealed' },
+      ],
+      cartons: makeCartons('S', 7_001, 30, ['BT-SPK']),
+      pallets: 3,
+      provenanceDoc: { type: 'Commercial invoice', verified: true },
+      sampleEvidence: [
+        { sku: 'BT-SPK', photos: ['placeholder-1.svg'], testResult: 'Passed, 10/10 units power on and pair' },
+      ],
+      reserve: 80_000,
+      conditions: ['Export only'],
+      collectionWindow: { from: isoAt(baseMs, -24 * 6), to: isoAt(baseMs, 24 * 2) },
+      state: 'In deal',
+      opensAt: isoAt(baseMs, -24 * 20),
+      closesAt: isoAt(baseMs, -24 * 13),
+      questions: [],
+    },
+    {
+      id: 'LOT-1029',
+      sellerId: 's3',
+      title: 'Air fryers, discontinued colourway',
+      category: 'Household',
+      grade: 'New open box',
+      gradeTolerancePct: 0.1,
+      warehouse: { emirate: 'Sharjah', area: 'Industrial Area 13' },
+      showSellerName: true,
+      manifest: [
+        { sku: 'AF-5L', product: 'Air fryer, 5L, discontinued colourway', qty: 700, unitRetailValue: 280, grade: 'New open box' },
+      ],
+      cartons: makeCartons('S', 7_101, 35, ['AF-5L']),
+      pallets: 4,
+      provenanceDoc: { type: 'Commercial invoice', verified: true },
+      inspectionReport: { date: isoAt(baseMs, -24 * 33), summary: 'Sampled units power on; packaging previously opened' },
+      sampleEvidence: [
+        { sku: 'AF-5L', photos: ['placeholder-1.svg'], testResult: 'Passed, 9/10 units power on' },
+      ],
+      reserve: 32_000,
+      conditions: [],
+      collectionWindow: { from: isoAt(baseMs, -24 * 28), to: isoAt(baseMs, -24 * 20) },
+      state: 'Completed',
+      opensAt: isoAt(baseMs, -24 * 40),
+      closesAt: isoAt(baseMs, -24 * 33),
+      questions: [],
+    },
+  ];
+
+  return lots;
+}
